@@ -19,11 +19,11 @@ def start_command_handler(message: Message) -> None:
     keyboard_generator = ServeyInlineMarkupGen()
 
     buttons = ["Да", "Нет"]
-    callback_data = ["cb_cis_citizen", "cb_not_cis_citizen"]
+    callback_data = ["cb_rf_citizen", "cb_not_rf_citizen"]
 
     bot.send_message(
         chat_id=message.chat.id,
-        text="Привет! Ты являешься гражданином СНГ?",
+        text="Привет! Ты являешься гражданином РФ?",
         reply_markup=keyboard_generator.gen_keyboard(buttons=buttons, callback_data=callback_data)
     )
 
@@ -33,23 +33,72 @@ def callback_query(callback: CallbackQuery) -> None:
     keyboard_generator = ServeyInlineMarkupGen()
 
     buttons = ["Да", "Нет"]
-    is_live_in_moscow_callback_data = ["cb_live_in_moscow", "cb_doesnt_live_in_moscow"]
-    wanna_live_in_russia = ["cb_wanna_live_in_russia", "cb_doesnt_wanna_live_in_russia"]
 
-    # Если гражданин СНГ
-    if callback.data == "cb_cis_citizen":
+    # Если гражданин РФ, узнаем о том, живет ли Москве.
+    if callback.data == "cb_rf_citizen":
         bot.send_message(
             callback.json["message"]["chat"]["id"],
             text="Отлично! Являешься ли ты жителем Москвы?",
-            reply_markup=keyboard_generator.gen_keyboard(buttons=buttons, callback_data=is_live_in_moscow_callback_data)
+            reply_markup=keyboard_generator.gen_keyboard(
+                buttons=buttons,
+                callback_data=["cb_live_in_moscow", "cb_doesnt_live_in_moscow"]
+            )
         )
-    # Если не гражданин СНГ
-    elif callback.data == "cb_not_cis_citizen":
+    # Независимо от того живет ли гражданин в Москве, узнаем студент ли он.
+    elif callback.data == "cb_live_in_moscow" or callback.data == "cb_doesnt_live_in_moscow":
+        bot.send_message(
+            callback.json["message"]["chat"]["id"],
+            text="Вы студент?",
+            reply_markup=keyboard_generator.gen_keyboard(
+                buttons=buttons,
+                callback_data=["cb_student", "cb_not_student"],
+            )
+        )
+    # Если не студент, то узнаем о его желании учиться в Москве.
+    elif callback.data == "cb_not_student":
+        bot.send_message(
+            callback.json["message"]["chat"]["id"],
+            text="Хотели бы учиться в Москве?",
+            reply_markup=keyboard_generator.gen_keyboard(
+                buttons=buttons,
+                callback_data=["cb_wanna_study_in_moscow", "cb_doesnt_wanna_study_in_moscow"],
+            )
+        )
+
+    # Если не гражданин РФ, то узнаем о желании быть гражданином РФ.
+    elif callback.data == "cb_not_rf_citizen":
         bot.send_message(
             callback.json["message"]["chat"]["id"],
             text="Хотели бы вы стать гражданином РФ?",
-            reply_markup=keyboard_generator.gen_keyboard(buttons=buttons, callback_data=wanna_live_in_russia)
+            reply_markup=keyboard_generator.gen_keyboard(
+                buttons=buttons,
+                callback_data=["cb_wanna_live_in_russia", "cb_doesnt_wanna_live_in_russia"]
+            )
         )
+
+    # Если хочет быть гражданином РФ, то узнаем о желании учиться в Москве.
+    elif callback.data == "cb_wanna_live_in_russia":
+        bot.send_message(
+            callback.json["message"]["chat"]["id"],
+            text="Переехав в Россию, вы бы хотели получить образование в одном и ВУЗов Москвы?",
+            reply_markup=keyboard_generator.gen_keyboard(
+                buttons=buttons,
+                callback_data=["cb_wanna_study_in_moscow", "cb_doesnt_wanna_study_in_moscow"]
+            )
+        )
+
+    # Завершаем опрос в этих точках.
+    elif (
+            callback.data == "cb_doesnt_wanna_live_in_russia" or
+            callback.data == "cb_student" or
+            callback.data == "cb_dead_end" or
+            callback.data == "cb_wanna_study_in_moscow" or
+            callback.data == "cb_doesnt_wanna_study_in_moscow"
+    ):
+        bot.send_message(
+            callback.json["message"]["chat"]["id"],
+            text="Спасибо за участие в опросе!",
+            )
 
 
 bot.infinity_polling()
