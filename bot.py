@@ -7,6 +7,9 @@ from telebot.types import CallbackQuery, Message
 
 from keyboards.inline_keyboard import ServeyInlineMarkupGen
 
+from handlers.callback_data_handler import callback_data_handler
+
+
 dotenv.load_dotenv(".env", override=True)
 
 API_TOKEN = os.environ.get("TOKEN")
@@ -30,61 +33,56 @@ def start_command_handler(message: Message) -> None:
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_query(callback: CallbackQuery) -> None:
-    keyboard_generator = ServeyInlineMarkupGen()
-
     buttons = ["Да", "Нет"]
 
     # Если гражданин РФ, узнаем о том, живет ли Москве.
     if callback.data == "cb_rf_citizen":
-        bot.send_message(
-            callback.json["message"]["chat"]["id"],
+        callback_data_handler(
             text="Отлично! Являешься ли ты жителем Москвы?",
-            reply_markup=keyboard_generator.gen_keyboard(
-                buttons=buttons,
-                callback_data=["cb_live_in_moscow", "cb_doesnt_live_in_moscow"]
-            )
+            buttons=buttons,
+            callback=callback,
+            callback_data=["cb_live_in_moscow", "cb_doesnt_live_in_moscow"],
+            bot=bot
         )
+
     # Независимо от того живет ли гражданин в Москве, узнаем студент ли он.
     elif callback.data == "cb_live_in_moscow" or callback.data == "cb_doesnt_live_in_moscow":
-        bot.send_message(
-            callback.json["message"]["chat"]["id"],
+        callback_data_handler(
             text="Вы студент?",
-            reply_markup=keyboard_generator.gen_keyboard(
-                buttons=buttons,
-                callback_data=["cb_student", "cb_not_student"],
-            )
+            buttons=buttons,
+            callback=callback,
+            callback_data=["cb_student", "cb_not_student"],
+            bot=bot
         )
+
     # Если не студент, то узнаем о его желании учиться в Москве.
     elif callback.data == "cb_not_student":
-        bot.send_message(
-            callback.json["message"]["chat"]["id"],
+        callback_data_handler(
             text="Хотели бы учиться в Москве?",
-            reply_markup=keyboard_generator.gen_keyboard(
-                buttons=buttons,
-                callback_data=["cb_wanna_study_in_moscow", "cb_doesnt_wanna_study_in_moscow"],
-            )
+            buttons=buttons,
+            callback=callback,
+            callback_data=["cb_wanna_study_in_moscow", "cb_doesnt_wanna_study_in_moscow"],
+            bot=bot
         )
 
     # Если не гражданин РФ, то узнаем о желании быть гражданином РФ.
     elif callback.data == "cb_not_rf_citizen":
-        bot.send_message(
-            callback.json["message"]["chat"]["id"],
+        callback_data_handler(
             text="Хотели бы вы стать гражданином РФ?",
-            reply_markup=keyboard_generator.gen_keyboard(
-                buttons=buttons,
-                callback_data=["cb_wanna_live_in_russia", "cb_doesnt_wanna_live_in_russia"]
-            )
+            buttons=buttons,
+            callback=callback,
+            callback_data=["cb_wanna_live_in_russia", "cb_doesnt_wanna_live_in_russia"],
+            bot=bot
         )
 
     # Если хочет быть гражданином РФ, то узнаем о желании учиться в Москве.
     elif callback.data == "cb_wanna_live_in_russia":
-        bot.send_message(
-            callback.json["message"]["chat"]["id"],
+        callback_data_handler(
             text="Переехав в Россию, вы бы хотели получить образование в одном и ВУЗов Москвы?",
-            reply_markup=keyboard_generator.gen_keyboard(
-                buttons=buttons,
-                callback_data=["cb_wanna_study_in_moscow", "cb_doesnt_wanna_study_in_moscow"]
-            )
+            buttons=buttons,
+            callback=callback,
+            callback_data=["cb_wanna_study_in_moscow", "cb_doesnt_wanna_study_in_moscow"],
+            bot=bot
         )
 
     # Завершаем опрос в этих точках.
