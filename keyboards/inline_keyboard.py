@@ -13,8 +13,6 @@ class ServeyInlineMarkupGen:
     def gen_keyboard(self, buttons: list, callback_data: list) -> InlineKeyboardMarkup:
         """Функция добавляет кнопки к клавиатуре на основе переданных аргументов"""
         for button, cb_data in zip(buttons, callback_data):
-            self.markup.add(
-                self.keyboard_button(text=button, callback_data=cb_data)
-            )
+            self.markup.add(self.keyboard_button(text=button, callback_data=cb_data))
 
         return self.markup

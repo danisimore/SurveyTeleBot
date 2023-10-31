@@ -17,7 +17,6 @@ def callback_data_handler(text, buttons, callback, callback_data, bot):
         callback.json["message"]["chat"]["id"],
         text=text,
         reply_markup=keyboard_generator.gen_keyboard(
-            buttons=buttons,
-            callback_data=callback_data
-        )
+            buttons=buttons, callback_data=callback_data
+        ),
     )
