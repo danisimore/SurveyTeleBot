@@ -1,4 +1,4 @@
-from keyboards.inline_keyboard import ServeyInlineMarkupGen
+from keyboards.inline_keyboard import ServeyKeyboardGenerator
 
 
 def callback_data_handler(text, buttons, callback, callback_data, bot):
@@ -11,12 +11,12 @@ def callback_data_handler(text, buttons, callback, callback_data, bot):
     :return:
     """
 
-    keyboard_generator = ServeyInlineMarkupGen()
+    keyboard_generator = ServeyKeyboardGenerator()
 
     bot.send_message(
         callback.json["message"]["chat"]["id"],
         text=text,
-        reply_markup=keyboard_generator.gen_keyboard(
+        reply_markup=keyboard_generator.gen_inline_markup(
             buttons=buttons, callback_data=callback_data
         ),
     )
